@@ -45,15 +45,22 @@ filtered_data = data[
     (data["Submission Date"] <= pd.Timestamp(end_date))
 ]
 
-employee_options = ["All"] + sorted(filtered_data["Employee"].dropna().unique().tolist())
-selected_employee = st.sidebar.selectbox("Employee", employee_options)
-if selected_employee != "All":
-    filtered_data = filtered_data[filtered_data["Employee"] == selected_employee]
+# Status Filter
+status_options = ["All"] + sorted(filtered_data["Status"].dropna().unique().tolist())
+selected_status = st.sidebar.selectbox("Status", status_options)
+if selected_status != "All":
+    filtered_data = filtered_data[filtered_data["Status"] == selected_status]
 
-location_options = ["All"] + sorted(filtered_data["Location"].dropna().unique().tolist())
-selected_location = st.sidebar.selectbox("Location", location_options)
-if selected_location != "All":
-    filtered_data = filtered_data[filtered_data["Location"] == selected_location]
+# Reason Filter
+reason_options = ["All"] + sorted(filtered_data["Reason"].dropna().unique().tolist())
+selected_reason = st.sidebar.selectbox("Reason", reason_options)
+if selected_reason != "All":
+    filtered_data = filtered_data[filtered_data["Reason"] == selected_reason]
+
+# Customer Name Search
+customer_search = st.sidebar.text_input("Search Customer Name")
+if customer_search:
+    filtered_data = filtered_data[filtered_data["Customer Name"].str.contains(customer_search, case=False, na=False)]
 
 # --- Total Summary ---
 st.header(f"📌 Overall Totals – {selected_file}")
