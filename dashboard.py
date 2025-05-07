@@ -14,13 +14,13 @@ os.makedirs(UPLOAD_DIR, exist_ok=True)
 st.sidebar.header("📤 Upload New Monthly File")
 uploaded_file = st.sidebar.file_uploader("Upload Excel File", type=["xlsm"])
 
-if uploaded_file:
+if uploaded_file and "just_uploaded" not in st.session_state:
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
     save_path = os.path.join(UPLOAD_DIR, f"{timestamp}_{uploaded_file.name}")
     with open(save_path, "wb") as f:
         f.write(uploaded_file.getbuffer())
-    st.success(f"Uploaded: {uploaded_file.name}")
-    st.experimental_rerun()
+    st.session_state.just_uploaded = True
+    st.rerun()
 
 # --- Load Most Recent File Automatically ---
 available_files = sorted(
