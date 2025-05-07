@@ -7,6 +7,9 @@ import matplotlib.pyplot as plt
 xls = pd.ExcelFile("March Tally.xlsm")
 data = xls.parse('Sheet1')
 
+# Ensure MRC is numeric
+data["MRC"] = pd.to_numeric(data["MRC"], errors="coerce")
+
 st.title("📊 March Customer Activity Dashboard")
 
 # --- Total Summary ---
