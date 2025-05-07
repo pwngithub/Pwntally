@@ -7,7 +7,7 @@ from datetime import datetime
 
 st.title("📊 Monthly Customer Activity Dashboard")
 
-# --- File Upload & Persistence ---
+# --- File Upload ---
 UPLOAD_DIR = "uploaded_data"
 os.makedirs(UPLOAD_DIR, exist_ok=True)
 
@@ -19,17 +19,25 @@ if uploaded_file:
     save_path = os.path.join(UPLOAD_DIR, f"{timestamp}_{uploaded_file.name}")
     with open(save_path, "wb") as f:
         f.write(uploaded_file.getbuffer())
-    st.sidebar.success(f"Saved: {save_path}")
+    st.success(f"Uploaded: {uploaded_file.name}")
+    st.experimental_rerun()
 
-# List uploaded files
-available_files = sorted([f for f in os.listdir(UPLOAD_DIR) if f.endswith(".xlsm")], reverse=True)
-selected_file = st.sidebar.selectbox("📂 Select file to analyze", available_files)
+# --- Load Most Recent File Automatically ---
+available_files = sorted(
+    [f for f in os.listdir(UPLOAD_DIR) if f.endswith(".xlsm")],
+    reverse=True
+)
 
-if not selected_file:
-    st.warning("Please upload and select a file to continue.")
+if not available_files:
+    st.warning("No uploaded files yet. Please upload an .xlsm file to continue.")
     st.stop()
 
-xls = pd.ExcelFile(os.path.join(UPLOAD_DIR, selected_file))
+latest_file = available_files[0]
+latest_file_path = os.path.join(UPLOAD_DIR, latest_file)
+
+st.subheader(f"📂 Analyzing File: `{latest_file}`")
+
+xls = pd.ExcelFile(latest_file_path)
 data = xls.parse('Sheet1')
 
 # --- Data Prep ---
@@ -45,29 +53,34 @@ filtered_data = data[
     (data["Submission Date"] <= pd.Timestamp(end_date))
 ]
 
-# Status Filter
 status_options = ["All"] + sorted(filtered_data["Status"].dropna().unique().tolist())
 selected_status = st.sidebar.selectbox("Status", status_options)
 if selected_status != "All":
     filtered_data = filtered_data[filtered_data["Status"] == selected_status]
 
-# Reason Filter
 reason_options = ["All"] + sorted(filtered_data["Reason"].dropna().unique().tolist())
 selected_reason = st.sidebar.selectbox("Reason", reason_options)
 if selected_reason != "All":
     filtered_data = filtered_data[filtered_data["Reason"] == selected_reason]
 
-# Customer Name Search
 customer_search = st.sidebar.text_input("Search Customer Name")
 if customer_search:
     filtered_data = filtered_data[filtered_data["Customer Name"].str.contains(customer_search, case=False, na=False)]
 
 # --- Total Summary ---
-st.header(f"📌 Overall Totals – {selected_file}")
+st.header("📌 Overall Totals")
 total_summary = filtered_data.groupby("Status").agg(Count=("Status", "count")).reset_index()
-total_mrc = filtered_data["MRC"].sum()
+
+# --- Adjust MRC: Treat Disconnects as negative ---
+adjusted_mrc = filtered_data.copy()
+adjusted_mrc["MRC"] = adjusted_mrc.apply(
+    lambda row: -row["MRC"] if row["Status"] == "Disconnect" else row["MRC"],
+    axis=1
+)
+total_mrc = adjusted_mrc["MRC"].sum()
+
 st.dataframe(total_summary)
-st.metric("Total MRC", f"${total_mrc:,.2f}")
+st.metric("Net MRC", f"${total_mrc:,.2f}")
 
 # --- Churn Summary ---
 st.header("⚠️ Churn Summary by Reason")
@@ -107,3 +120,25 @@ st.pyplot(fig3)
 st.header("📈 Daily Activity Trend")
 daily_trend = filtered_data.groupby(["Submission Date", "Status"]).size().unstack(fill_value=0)
 st.line_chart(daily_trend)
+
+# --- Status Breakdown: New, Converted, Previous ---
+st.header("📊 Status Breakdown: New, Converted, Previous")
+filtered_statuses = filtered_data[filtered_data["Status"].isin(["NEW", "Convert", "Previous"])]
+status_counts = filtered_statuses["Status"].value_counts().reset_index()
+status_counts.columns = ["Status", "Count"]
+
+fig_status, ax_status = plt.subplots()
+ax_status.bar(status_counts["Status"], status_counts["Count"])
+ax_status.set_title("New vs Converted vs Previous Customers")
+st.pyplot(fig_status)
+
+# --- Conditionally show New Count by Location ---
+if selected_status == "NEW":
+    st.header("📍 New Customers by Location (Filtered)")
+    new_by_location = filtered_data.groupby("Location").size().sort_values(ascending=False).reset_index(name="Count")
+
+    fig_new, ax_new = plt.subplots()
+    ax_new.bar(new_by_location["Location"], new_by_location["Count"])
+    ax_new.set_title("New Customer Count by Location")
+    ax_new.tick_params(axis='x', rotation=90)
+    st.pyplot(fig_new)
