@@ -22,7 +22,7 @@ if uploaded_file and "just_uploaded" not in st.session_state:
     st.session_state.just_uploaded = True
     st.rerun()
 
-# --- Load Most Recent File Automatically ---
+# --- List stored files for selection ---
 available_files = sorted(
     [f for f in os.listdir(UPLOAD_DIR) if f.endswith(".xlsm")],
     reverse=True
@@ -32,12 +32,13 @@ if not available_files:
     st.warning("No uploaded files yet. Please upload an .xlsm file to continue.")
     st.stop()
 
-latest_file = available_files[0]
-latest_file_path = os.path.join(UPLOAD_DIR, latest_file)
+st.sidebar.header("📂 Select Stored File")
+selected_file = st.sidebar.selectbox("Choose a file to analyze", available_files)
 
-st.subheader(f"📂 Analyzing File: `{latest_file}`")
+selected_file_path = os.path.join(UPLOAD_DIR, selected_file)
+st.subheader(f"📂 Analyzing File: `{selected_file}`")
 
-xls = pd.ExcelFile(latest_file_path)
+xls = pd.ExcelFile(selected_file_path)
 data = xls.parse('Sheet1')
 
 # --- Data Prep ---
