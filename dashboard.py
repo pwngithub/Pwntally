@@ -2,20 +2,42 @@
 import pandas as pd
 import streamlit as st
 import matplotlib.pyplot as plt
+import os
+from datetime import datetime
 
-# Load Excel file
-xls = pd.ExcelFile("March Tally.xlsm")
+st.title("📊 Monthly Customer Activity Dashboard")
+
+# --- File Upload & Persistence ---
+UPLOAD_DIR = "uploaded_data"
+os.makedirs(UPLOAD_DIR, exist_ok=True)
+
+st.sidebar.header("📤 Upload New Monthly File")
+uploaded_file = st.sidebar.file_uploader("Upload Excel File", type=["xlsm"])
+
+if uploaded_file:
+    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+    save_path = os.path.join(UPLOAD_DIR, f"{timestamp}_{uploaded_file.name}")
+    with open(save_path, "wb") as f:
+        f.write(uploaded_file.getbuffer())
+    st.sidebar.success(f"Saved: {save_path}")
+
+# List uploaded files
+available_files = sorted([f for f in os.listdir(UPLOAD_DIR) if f.endswith(".xlsm")], reverse=True)
+selected_file = st.sidebar.selectbox("📂 Select file to analyze", available_files)
+
+if not selected_file:
+    st.warning("Please upload and select a file to continue.")
+    st.stop()
+
+xls = pd.ExcelFile(os.path.join(UPLOAD_DIR, selected_file))
 data = xls.parse('Sheet1')
 
-# Ensure proper types
+# --- Data Prep ---
 data["MRC"] = pd.to_numeric(data["MRC"], errors="coerce")
 data["Submission Date"] = pd.to_datetime(data["Submission Date"], errors="coerce")
 
-st.title("📊 Enhanced March Customer Activity Dashboard")
-
 # --- Filters ---
 st.sidebar.header("🔍 Filters")
-# Date Range
 min_date, max_date = data["Submission Date"].min(), data["Submission Date"].max()
 start_date, end_date = st.sidebar.date_input("Submission Date Range", [min_date, max_date])
 filtered_data = data[
@@ -23,20 +45,18 @@ filtered_data = data[
     (data["Submission Date"] <= pd.Timestamp(end_date))
 ]
 
-# Employee Filter
 employee_options = ["All"] + sorted(filtered_data["Employee"].dropna().unique().tolist())
 selected_employee = st.sidebar.selectbox("Employee", employee_options)
 if selected_employee != "All":
     filtered_data = filtered_data[filtered_data["Employee"] == selected_employee]
 
-# Location Filter
 location_options = ["All"] + sorted(filtered_data["Location"].dropna().unique().tolist())
 selected_location = st.sidebar.selectbox("Location", location_options)
 if selected_location != "All":
     filtered_data = filtered_data[filtered_data["Location"] == selected_location]
 
 # --- Total Summary ---
-st.header("📌 Overall Totals")
+st.header(f"📌 Overall Totals – {selected_file}")
 total_summary = filtered_data.groupby("Status").agg(Count=("Status", "count")).reset_index()
 total_mrc = filtered_data["MRC"].sum()
 st.dataframe(total_summary)
@@ -80,9 +100,3 @@ st.pyplot(fig3)
 st.header("📈 Daily Activity Trend")
 daily_trend = filtered_data.groupby(["Submission Date", "Status"]).size().unstack(fill_value=0)
 st.line_chart(daily_trend)
-
-# --- Upload ---
-st.sidebar.header("📤 Upload New Data")
-uploaded_file = st.sidebar.file_uploader("Upload Excel File", type=["xlsm"])
-if uploaded_file:
-    st.sidebar.success("File uploaded. (App refresh/reload will be needed to process.)")
