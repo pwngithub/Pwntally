@@ -5,18 +5,22 @@ import matplotlib.pyplot as plt
 
 # Load Excel file
 xls = pd.ExcelFile("March Tally.xlsm")
-disconnects_df = xls.parse('Disconnects')
-total_df = xls.parse('Total Sheet')
+data = xls.parse('Sheet1')
 
-st.title("📉 March Customer Activity Dashboard")
+st.title("📊 March Customer Activity Dashboard")
 
 # --- Total Summary ---
-st.header("Overall Totals")
-st.dataframe(total_df)
+st.header("Overall Totals by Status")
+total_summary = data.groupby("Status").agg(
+    Count=("Status", "count"),
+    Total_MRC=("MRC", "sum")
+).reset_index()
+st.dataframe(total_summary)
 
 # --- Churn Breakdown ---
 st.header("Churn Summary by Reason")
-churn_summary = disconnects_df.groupby("Reason").agg(
+churn_df = data[data["Status"] == "Disconnect"]
+churn_summary = churn_df.groupby("Reason").agg(
     Count=("Reason", "count"),
     Total_MRC=("MRC", "sum")
 ).reset_index()
@@ -24,7 +28,7 @@ st.dataframe(churn_summary)
 
 # --- Churn by Location ---
 st.header("Churn by Location")
-loc_summary = disconnects_df.groupby("Location").agg(
+loc_summary = churn_df.groupby("Location").agg(
     Count=("Location", "count"),
     Total_MRC=("MRC", "sum")
 ).sort_values(by="Count", ascending=False).reset_index()
@@ -45,7 +49,7 @@ ax2.tick_params(axis='x', rotation=90)
 st.pyplot(fig2)
 
 fig3, ax3 = plt.subplots()
-category_counts = total_df.set_index("Category (Status)")["Total Count"]
+category_counts = data["Status"].value_counts()
 category_counts.plot(kind="pie", autopct='%1.1f%%', ax=ax3)
 ax3.set_ylabel("")
 ax3.set_title("Customer Status Breakdown")
