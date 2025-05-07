@@ -12,25 +12,26 @@ st.title("📊 March Customer Activity Dashboard")
 # --- Total Summary ---
 st.header("Overall Totals by Status")
 total_summary = data.groupby("Status").agg(
-    Count=("Status", "count"),
-    Total_MRC=("MRC", "sum")
+    Count=("Status", "count")
 ).reset_index()
+total_mrc = data["MRC"].sum()
 st.dataframe(total_summary)
+st.metric("Total MRC", f"${total_mrc:,.2f}")
 
 # --- Churn Breakdown ---
 st.header("Churn Summary by Reason")
 churn_df = data[data["Status"] == "Disconnect"]
 churn_summary = churn_df.groupby("Reason").agg(
-    Count=("Reason", "count"),
-    Total_MRC=("MRC", "sum")
+    Count=("Reason", "count")
 ).reset_index()
+churn_total_mrc = churn_df["MRC"].sum()
 st.dataframe(churn_summary)
+st.metric("Churn Total MRC", f"${churn_total_mrc:,.2f}")
 
 # --- Churn by Location ---
 st.header("Churn by Location")
 loc_summary = churn_df.groupby("Location").agg(
-    Count=("Location", "count"),
-    Total_MRC=("MRC", "sum")
+    Count=("Location", "count")
 ).sort_values(by="Count", ascending=False).reset_index()
 st.dataframe(loc_summary)
 
