@@ -109,8 +109,20 @@ net_growth_mrc = new_mrc + convert_mrc + previous_mrc - churn_mrc
 st.dataframe(growth_totals)
 st.metric("Net Growth MRC (Gains - Churn)", f"${net_growth_mrc:,.2f}")
 
-# --- Growth by Location ---
-st.subheader("📍 New, Convert, Previous by Location")
+
+# --- Growth by Location (Conditional) ---
+if selected_status in ["NEW", "Convert", "Previous"]:
+    st.subheader(f"📍 {selected_status} Customers by Location")
+    status_df = filtered_data[filtered_data["Status"] == selected_status]
+    if not status_df.empty:
+        loc_summary = status_df.groupby("Location").agg(Count=("Location", "count")).sort_values(by="Count", ascending=False).reset_index()
+        st.dataframe(loc_summary)
+        fig, ax = plt.subplots()
+        ax.bar(loc_summary["Location"], loc_summary["Count"])
+        ax.set_title(f"{selected_status} Count by Location")
+        ax.tick_params(axis='x', rotation=90)
+        st.pyplot(fig)
+
 for label in ["NEW", "Convert", "Previous"]:
     temp = filtered_data[filtered_data["Status"] == label]
     if not temp.empty:
