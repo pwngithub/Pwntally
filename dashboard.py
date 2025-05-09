@@ -16,7 +16,15 @@ uploaded_file = st.sidebar.file_uploader("Upload Excel File", type=["xlsx", "xls
 
 if uploaded_file and "just_uploaded" not in st.session_state:
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-    save_path = os.path.join(UPLOAD_DIR, f"{timestamp}_{uploaded_file.name.replace('.xlsm', '.xlsx').replace('.xls', '.xlsx')}")
+    
+ext = uploaded_file.name.split(".")[-1].lower()
+filename = f"{timestamp}_{uploaded_file.name}"
+if ext in ["xls", "xlsm"]:
+    filename = filename.replace(f".{ext}", ".xlsx")
+save_path = os.path.join(UPLOAD_DIR, filename)
+with open(save_path, "wb") as f:
+    f.write(uploaded_file.getbuffer())
+
     with open(save_path, "wb") as f:
         f.write(uploaded_file.getbuffer())
     st.session_state.just_uploaded = True
@@ -24,7 +32,7 @@ if uploaded_file and "just_uploaded" not in st.session_state:
 
 # --- File Selection ---
 st.sidebar.header("📂 Stored Files")
-all_files = [f for f in os.listdir(UPLOAD_DIR) if f.endswith(".xlsx") or f.endswith(".xlsm")]
+all_files = [f for f in os.listdir(UPLOAD_DIR) if f.endswith(".xlsx")]
 sort_order = st.sidebar.radio("Sort by", options=["Newest First", "Oldest First"])
 available_files = sorted(all_files, reverse=(sort_order == "Newest First"))
 
