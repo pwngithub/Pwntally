@@ -47,7 +47,7 @@ with st.expander("📄 Preview First 5 Rows"):
 if st.sidebar.button("🗑️ Delete Selected File"):
     os.remove(selected_file_path)
     st.success(f"Deleted: {selected_file}")
-    st.experimental_rerun()
+    st.rerun()
 
 # --- Load File ---
 st.subheader(f"📂 Analyzing File: `{selected_file}`")
