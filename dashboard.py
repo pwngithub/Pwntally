@@ -15,7 +15,9 @@ st.sidebar.header("📤 Upload New Monthly File")
 uploaded_file = st.sidebar.file_uploader("Upload Excel File", type=["xlsx", "xlsm"])
 
 
+
 if uploaded_file and "just_uploaded" not in st.session_state:
+    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
     ext = uploaded_file.name.split(".")[-1].lower()
     filename = f"{timestamp}_{uploaded_file.name}"
     if ext in ["xls", "xlsm"]:
@@ -25,6 +27,7 @@ if uploaded_file and "just_uploaded" not in st.session_state:
         f.write(uploaded_file.getbuffer())
     st.session_state.just_uploaded = True
     st.rerun()
+
 
 
 # --- File Selection ---
