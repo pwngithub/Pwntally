@@ -12,11 +12,11 @@ UPLOAD_DIR = "uploaded_data"
 os.makedirs(UPLOAD_DIR, exist_ok=True)
 
 st.sidebar.header("📤 Upload New Monthly File")
-uploaded_file = st.sidebar.file_uploader("Upload Excel File", type=["xlsm"])
+uploaded_file = st.sidebar.file_uploader("Upload Excel File", type=["xlsx", "xlsm"])
 
 if uploaded_file and "just_uploaded" not in st.session_state:
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-    save_path = os.path.join(UPLOAD_DIR, f"{timestamp}_{uploaded_file.name}")
+    save_path = os.path.join(UPLOAD_DIR, f"{timestamp}_{uploaded_file.name.replace('.xlsm', '.xlsx').replace('.xls', '.xlsx')}")
     with open(save_path, "wb") as f:
         f.write(uploaded_file.getbuffer())
     st.session_state.just_uploaded = True
@@ -24,7 +24,7 @@ if uploaded_file and "just_uploaded" not in st.session_state:
 
 # --- File Selection ---
 st.sidebar.header("📂 Stored Files")
-all_files = [f for f in os.listdir(UPLOAD_DIR) if f.endswith(".xlsm")]
+all_files = [f for f in os.listdir(UPLOAD_DIR) if f.endswith(".xlsx") or f.endswith(".xlsm")]
 sort_order = st.sidebar.radio("Sort by", options=["Newest First", "Oldest First"])
 available_files = sorted(all_files, reverse=(sort_order == "Newest First"))
 
