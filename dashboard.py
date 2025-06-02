@@ -67,9 +67,6 @@ if st.session_state.get("date_range") is None:
 
 date_range = st.sidebar.date_input("Submission Date Range", value=[min_date, max_date])
 if len(date_range) != 2:
-    st.error("Please select a start and end date.")
-    st.stop()
-if len(date_range) != 2:
     st.error("Please select both a start and end date.")
     st.stop()
 start_date, end_date = date_range
