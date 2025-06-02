@@ -51,13 +51,25 @@ data["MRC"] = pd.to_numeric(data["MRC"], errors="coerce")
 data["Submission Date"] = pd.to_datetime(data["Submission Date"], errors="coerce")
 data["Submission Date"] = pd.to_datetime(data["Submission Date"], format="%b %d, %Y", errors="coerce").fillna(data["Submission Date"])
 
+
+# --- Detect file change and reset date filter ---
+if "last_file" not in st.session_state or st.session_state.last_file != selected_file:
+    st.session_state.date_range = None
+    st.session_state.last_file = selected_file
+
+# --- Filters ---
 st.sidebar.header("🔍 Filters")
 min_date, max_date = data["Submission Date"].min(), data["Submission Date"].max()
-date_range = st.sidebar.date_input("Submission Date Range", [min_date, max_date])
+
+if st.session_state.get("date_range") is None:
+    st.session_state.date_range = [min_date, max_date]
+
+date_range = st.sidebar.date_input("Submission Date Range", st.session_state.date_range)
 if len(date_range) != 2:
     st.error("Please select a start and end date.")
     st.stop()
 start_date, end_date = date_range
+
 filtered_data = data[
     (data["Submission Date"] >= pd.Timestamp(start_date)) &
     (data["Submission Date"] <= pd.Timestamp(end_date))
