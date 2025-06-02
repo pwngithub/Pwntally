@@ -68,6 +68,15 @@ selected_reason = st.sidebar.selectbox("Reason", reason_options)
 if selected_reason != "All":
     df = df[df["Reason"] == selected_reason]
 
+
+# --- Month Filter ---
+if "Submission Date" in df.columns:
+    df["Month"] = df["Submission Date"].dt.to_period("M").astype(str)
+    month_options = ["All"] + sorted(df["Month"].dropna().unique().tolist())
+    selected_month = st.sidebar.selectbox("Submission Month", month_options)
+    if selected_month != "All":
+        df = df[df["Month"] == selected_month]
+
 # --- Metrics ---
 
 
