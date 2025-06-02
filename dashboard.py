@@ -69,26 +69,25 @@ if selected_reason != "All":
     df = df[df["Reason"] == selected_reason]
 
 
-# --- Assign full_df early ---
+# --- Assign full_df before filtering ---
 full_df = df.copy()
 
-# --- Parse dates and derive Month ---
-if "Submission Date" in full_df.columns:
-    full_df["Submission Date"] = pd.to_datetime(full_df["Submission Date"], errors="coerce")
-    full_df = full_df.dropna(subset=["Submission Date"])
-    full_df["Month"] = full_df["Submission Date"].dt.to_period("M").astype(str)
+# --- Parse Submission Date and Month ---
+full_df["Submission Date"] = pd.to_datetime(full_df["Submission Date"], errors="coerce")
+full_df = full_df.dropna(subset=["Submission Date"])
+full_df["Month"] = full_df["Submission Date"].dt.to_period("M").astype(str)
 
-    df["Submission Date"] = pd.to_datetime(df["Submission Date"], errors="coerce")
-    df = df.dropna(subset=["Submission Date"])
-    df["Month"] = df["Submission Date"].dt.to_period("M").astype(str)
+df["Submission Date"] = pd.to_datetime(df["Submission Date"], errors="coerce")
+df = df.dropna(subset=["Submission Date"])
+df["Month"] = df["Submission Date"].dt.to_period("M").astype(str)
 
-    month_options = ["All"] + sorted(full_df["Month"].dropna().unique().tolist())
-    selected_month = st.sidebar.selectbox("Submission Month", month_options)
-    if selected_month != "All":
-        df = df[df["Month"] == selected_month]
+# --- Submission Month Filter (built from full_df) ---
+month_options = ["All"] + sorted(full_df["Month"].unique())
+selected_month = st.sidebar.selectbox("Submission Month", month_options)
+if selected_month != "All":
+    df = df[df["Month"] == selected_month]
 
 # --- Metrics ---
-
 
 
 
