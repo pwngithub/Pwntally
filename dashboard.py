@@ -69,8 +69,9 @@ if selected_reason != "All":
     df = df[df["Reason"] == selected_reason]
 
 
-# --- Month Filter ---
+# --- Fix Submission Date dtype ---
 if "Submission Date" in df.columns:
+    df["Submission Date"] = pd.to_datetime(df["Submission Date"], errors="coerce")
     df["Month"] = df["Submission Date"].dt.to_period("M").astype(str)
     month_options = ["All"] + sorted(df["Month"].dropna().unique().tolist())
     selected_month = st.sidebar.selectbox("Submission Month", month_options)
@@ -78,6 +79,7 @@ if "Submission Date" in df.columns:
         df = df[df["Month"] == selected_month]
 
 # --- Metrics ---
+
 
 
 
