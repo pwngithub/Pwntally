@@ -48,7 +48,16 @@ disconnect_df = df[df["Status"] == "Disconnect"]
 convert_df = df[df["Status"] == "CONVERT"]
 gains_df = df[df["Status"].isin(["NEW", "CONVERT"])]
 
+
+# --- Filters ---
+st.sidebar.header("🔍 Filter Data")
+category_options = ["All"] + sorted(df["Category"].dropna().unique().tolist())
+selected_category = st.sidebar.selectbox("Category", category_options)
+if selected_category != "All":
+    df = df[df["Category"] == selected_category]
+
 # --- Metrics ---
+
 st.header("📌 Key Metrics")
 total_new = new_df.shape[0]
 total_disconnects = disconnect_df.shape[0]
