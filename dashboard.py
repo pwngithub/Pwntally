@@ -53,7 +53,11 @@ data["Submission Date"] = pd.to_datetime(data["Submission Date"], format="%b %d,
 
 st.sidebar.header("🔍 Filters")
 min_date, max_date = data["Submission Date"].min(), data["Submission Date"].max()
-start_date, end_date = st.sidebar.date_input("Submission Date Range", [min_date, max_date])
+date_range = st.sidebar.date_input("Submission Date Range", [min_date, max_date])
+if len(date_range) != 2:
+    st.error("Please select a start and end date.")
+    st.stop()
+start_date, end_date = date_range
 filtered_data = data[
     (data["Submission Date"] >= pd.Timestamp(start_date)) &
     (data["Submission Date"] <= pd.Timestamp(end_date))
