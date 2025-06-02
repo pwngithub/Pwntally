@@ -25,6 +25,11 @@ if uploaded_file and "just_uploaded" not in st.session_state:
     st.rerun()
 
 st.sidebar.header("📂 Stored Files")
+
+# --- Load and parse dates early to determine default range ---
+
+min_date, max_date = data["Submission Date"].min().date(), data["Submission Date"].max().date()
+
 all_files = [f for f in os.listdir(UPLOAD_DIR) if f.endswith(".xlsx")]
 sort_order = st.sidebar.radio("Sort files by", ["Newest First", "Oldest First"])
 available_files = sorted(all_files, reverse=(sort_order == "Newest First"))
