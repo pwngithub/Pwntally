@@ -42,7 +42,6 @@ gains_mrc = gains_df["MRC"].sum()
 churn_df = filtered_data[filtered_data["Status"] == "Disconnect"]
 churn_mrc = churn_df["MRC"].sum()
 net_growth_mrc = gains_mrc - churn_mrc
-
 st.metric("Net Growth MRC (Gains - Churn)", f"${net_growth_mrc:,.2f}")
 
 st.header("⚠️ Churn Summary by Reason")
