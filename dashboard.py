@@ -41,13 +41,20 @@ available_files = sorted(all_files, reverse=(sort_order == "Newest First"))
 if not available_files:
     st.warning("No uploaded files available.")
     st.stop()
-date_range = st.sidebar.date_input("Submission Date Range", value=[min_date, max_date])
+date_range = st.sidebar.date_input("Submission Date Range")
 
-if len(date_range) != 2:
-    st.error("Please select both a start and end date.")
+if "Submission Date" not in data.columns:
+    st.warning("No Submission Date column found.")
     st.stop()
 
-start_date, end_date = date_range
+if len(date_range) != 2:
+    filtered_data = data.copy()
+else:
+    start_date, end_date = date_range
+    filtered_data = data[
+        (data["Submission Date"].dt.date >= start_date) &
+        (data["Submission Date"].dt.date <= end_date)
+    ]
 filtered_data = data[
     (data["Submission Date"].dt.date >= start_date) &
     (data["Submission Date"].dt.date <= end_date)
