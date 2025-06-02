@@ -56,7 +56,14 @@ selected_category = st.sidebar.selectbox("Category", category_options)
 if selected_category != "All":
     df = df[df["Category"] == selected_category]
 
+
+status_options = ["All"] + sorted(df["Status"].dropna().unique().tolist())
+selected_status = st.sidebar.selectbox("Status", status_options)
+if selected_status != "All":
+    df = df[df["Status"] == selected_status]
+
 # --- Metrics ---
+
 
 st.header("📌 Key Metrics")
 total_new = new_df.shape[0]
