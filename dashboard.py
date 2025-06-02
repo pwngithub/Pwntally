@@ -34,20 +34,6 @@ if not available_files:
     st.warning("No uploaded files available.")
     st.stop()
 
-status_options = ["All"] + sorted(filtered_data["Status"].dropna().unique())
-selected_status = st.sidebar.selectbox("Status", status_options)
-if selected_status != "All":
-    filtered_data = filtered_data[filtered_data["Status"] == selected_status]
-
-reason_options = ["All"] + sorted(filtered_data["Reason"].dropna().unique())
-selected_reason = st.sidebar.selectbox("Reason", reason_options)
-if selected_reason != "All":
-    filtered_data = filtered_data[filtered_data["Reason"] == selected_reason]
-
-customer_search = st.sidebar.text_input("Search Customer Name")
-if customer_search:
-    filtered_data = filtered_data[filtered_data["Customer Name"].str.contains(customer_search, case=False, na=False)]
-
 st.header("📌 Overall Totals")
 total_summary = filtered_data.groupby("Status").agg(Count=("Status", "count")).reset_index()
 adjusted_mrc = filtered_data.copy()
