@@ -50,6 +50,7 @@ data = xls.parse("Sheet1")
 data["MRC"] = pd.to_numeric(data["MRC"], errors="coerce")
 data["Submission Date"] = pd.to_datetime(data["Submission Date"], errors="coerce")
 data["Submission Date"] = pd.to_datetime(data["Submission Date"], format="%b %d, %Y", errors="coerce").fillna(data["Submission Date"])
+data["Submission Date"] = data["Submission Date"].dt.normalize()
 
 
 # --- Detect file change and reset date filter ---
