@@ -32,40 +32,6 @@ available_files = sorted(all_files, reverse=(sort_order == "Newest First"))
 if not available_files:
     st.warning("No uploaded files available.")
     st.stop()
-
-selected_file = st.sidebar.selectbox("Choose a file to analyze", available_files)
-selected_file_path = os.path.join(UPLOAD_DIR, selected_file)
-
-with st.expander("📄 Preview First 5 Rows"):
-    try:
-        preview_df = pd.read_excel(selected_file_path, sheet_name="Sheet1", nrows=5)
-        st.dataframe(preview_df)
-    except Exception as e:
-        st.error(f"Error previewing file: {e}")
-
-st.subheader(f"📂 Analyzing File: `{selected_file}`")
-xls = pd.ExcelFile(selected_file_path)
-data = xls.parse("Sheet1")
-
-data["MRC"] = pd.to_numeric(data["MRC"], errors="coerce")
-data["Submission Date"] = pd.to_datetime(data["Submission Date"], errors="coerce")
-data["Submission Date"] = pd.to_datetime(data["Submission Date"], format="%b %d, %Y", errors="coerce").fillna(data["Submission Date"])
-data["Submission Date"] = data["Submission Date"].dt.normalize()
-
-
-# --- Detect file change and reset date filter ---
-if "last_file" not in st.session_state or st.session_state.last_file != selected_file:
-    st.session_state.date_range = None
-    st.session_state.last_file = selected_file
-
-# --- Filters ---
-st.sidebar.header("🔍 Filters")
-min_date, max_date = data["Submission Date"].min(), data["Submission Date"].max()
-
-if st.session_state.get("date_range") is None:
-    st.session_state.date_range = [min_date, max_date]
-
-date_range = st.sidebar.date_input("Submission Date Range", value=[min_date, max_date])
 if len(date_range) != 2:
     st.error("Please select both a start and end date.")
     st.stop()
@@ -73,12 +39,7 @@ start_date, end_date = date_range
 filtered_data = data[
     (data["Submission Date"].dt.date >= start_date) &
     (data["Submission Date"].dt.date <= end_date)
-][
-        (data["Submission Date"].dt.date >= start_date) &
-        (data["Submission Date"].dt.date <= end_date)
-    ]
-else:
-    filtered_data = data
+]
 
 filtered_data = data[
     (data["Submission Date"].dt.date >= start_date) &
