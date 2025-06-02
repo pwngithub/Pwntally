@@ -5,6 +5,17 @@ import streamlit as st
 import matplotlib.pyplot as plt
 from datetime import datetime
 
+import re
+
+def clean_total_mrc(value):
+    if pd.isna(value):
+        return 0
+    if isinstance(value, (int, float)):
+        return value
+    parts = re.findall(r"\d+\.\d{2}", str(value))
+    return sum(float(p) for p in parts)
+
+
 st.title("📊 Monthly Customer Activity Dashboard")
 
 # --- Ensure upload directory exists ---
