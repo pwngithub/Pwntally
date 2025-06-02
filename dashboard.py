@@ -92,6 +92,11 @@ churn_summary = disconnects.groupby("Reason").agg(
     Total_MRC=("MRC", "sum")
 ).reset_index()
 st.dataframe(churn_summary)
+# --- Total MRC ---
+if "Total_MRC" in churn_summary.columns:
+    total_mrc_sum = churn_summary["Total_MRC"].sum()
+    st.metric("Total MRC from Churn Reasons", f"${total_mrc_sum:,.2f}")
+
 
 # --- Charts ---
 st.header("📊 Visualizations")
