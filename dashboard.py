@@ -7,11 +7,9 @@ from datetime import datetime
 
 st.title("📊 Monthly Customer Activity Dashboard")
 
-# --- Shared Upload Directory ---
 UPLOAD_DIR = "uploaded_data"
 os.makedirs(UPLOAD_DIR, exist_ok=True)
 
-# --- Upload File ---
 st.sidebar.header("📤 Upload a New Monthly File")
 uploaded_file = st.sidebar.file_uploader("Choose an Excel File", type=["xlsx", "xlsm", "xls"])
 if uploaded_file and "just_uploaded" not in st.session_state:
@@ -26,7 +24,6 @@ if uploaded_file and "just_uploaded" not in st.session_state:
     st.session_state.just_uploaded = True
     st.rerun()
 
-# --- List Saved Files ---
 st.sidebar.header("📂 Stored Files")
 all_files = [f for f in os.listdir(UPLOAD_DIR) if f.endswith(".xlsx")]
 sort_order = st.sidebar.radio("Sort files by", ["Newest First", "Oldest First"])
@@ -39,7 +36,6 @@ if not available_files:
 selected_file = st.sidebar.selectbox("Choose a file to analyze", available_files)
 selected_file_path = os.path.join(UPLOAD_DIR, selected_file)
 
-# --- File Preview ---
 with st.expander("📄 Preview First 5 Rows"):
     try:
         preview_df = pd.read_excel(selected_file_path, sheet_name="Sheet1", nrows=5)
@@ -47,16 +43,14 @@ with st.expander("📄 Preview First 5 Rows"):
     except Exception as e:
         st.error(f"Error previewing file: {e}")
 
-# --- Analyze File ---
 st.subheader(f"📂 Analyzing File: `{selected_file}`")
 xls = pd.ExcelFile(selected_file_path)
 data = xls.parse("Sheet1")
 
-# --- Clean Data ---
 data["MRC"] = pd.to_numeric(data["MRC"], errors="coerce")
 data["Submission Date"] = pd.to_datetime(data["Submission Date"], errors="coerce")
+data["Submission Date"] = pd.to_datetime(data["Submission Date"], format="%b %d, %Y", errors="coerce").fillna(data["Submission Date"])
 
-# --- Filters ---
 st.sidebar.header("🔍 Filters")
 min_date, max_date = data["Submission Date"].min(), data["Submission Date"].max()
 start_date, end_date = st.sidebar.date_input("Submission Date Range", [min_date, max_date])
@@ -79,7 +73,6 @@ customer_search = st.sidebar.text_input("Search Customer Name")
 if customer_search:
     filtered_data = filtered_data[filtered_data["Customer Name"].str.contains(customer_search, case=False, na=False)]
 
-# --- Totals ---
 st.header("📌 Overall Totals")
 total_summary = filtered_data.groupby("Status").agg(Count=("Status", "count")).reset_index()
 adjusted_mrc = filtered_data.copy()
@@ -91,7 +84,6 @@ total_mrc = adjusted_mrc["MRC"].sum()
 st.dataframe(total_summary)
 st.metric("Net MRC", f"${total_mrc:,.2f}")
 
-# --- Growth Status Summary ---
 st.header("📈 Growth Summary (NEW, Convert, Previous)")
 growth_df = filtered_data[filtered_data["Status"].isin(["NEW", "Convert", "Previous"])].copy()
 growth_totals = growth_df.groupby("Status").agg(TotalMRC=("MRC", "sum")).reset_index()
@@ -107,13 +99,11 @@ net_growth_mrc = new_mrc + convert_mrc + previous_mrc - churn_mrc
 st.dataframe(growth_totals)
 st.metric("Net Growth MRC (Gains - Churn)", f"${net_growth_mrc:,.2f}")
 
-# --- Churn Reason Summary ---
 st.header("⚠️ Churn Summary by Reason")
 churn_summary = churn_df.groupby("Reason").agg(Count=("Reason", "count")).reset_index()
 st.dataframe(churn_summary)
 st.metric("Churn Total MRC", f"${churn_mrc:,.2f}")
 
-# --- Disconnect Location Map (Always)
 st.header("📍 Disconnects by Location")
 disconnect_df = filtered_data[filtered_data["Status"] == "Disconnect"]
 if not disconnect_df.empty:
@@ -125,7 +115,6 @@ if not disconnect_df.empty:
     ax.tick_params(axis='x', rotation=90)
     st.pyplot(fig)
 
-# --- NEW/Convert/Previous Location View (if filtered)
 if selected_status in ["NEW", "Convert", "Previous"]:
     st.subheader(f"📍 {selected_status} Customers by Location")
     status_df = filtered_data[filtered_data["Status"] == selected_status]
