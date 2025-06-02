@@ -34,12 +34,6 @@ if not available_files:
     st.warning("No uploaded files available.")
     st.stop()
 
-else:
-    filtered_data = data.copy()
-
-
-
-
 status_options = ["All"] + sorted(filtered_data["Status"].dropna().unique())
 selected_status = st.sidebar.selectbox("Status", status_options)
 if selected_status != "All":
