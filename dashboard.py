@@ -92,9 +92,10 @@ churn_summary = disconnects.groupby("Reason").agg(
     Total_MRC=("MRC", "sum")
 ).reset_index()
 st.dataframe(churn_summary)
+
 # --- Total MRC ---
-if "Total_MRC" in churn_summary.columns:
-    total_mrc_sum = churn_summary["Total_MRC"].sum()
+if "Total_MRC" in churn_summary.columns and pd.api.types.is_numeric_dtype(churn_summary["Total_MRC"]):
+    total_mrc_sum = pd.to_numeric(churn_summary["Total_MRC"], errors='coerce').sum()
     st.metric("Total MRC from Churn Reasons", f"${total_mrc_sum:,.2f}")
 
 
