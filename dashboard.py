@@ -20,7 +20,7 @@ if uploaded_file:
     with open(save_path, "wb") as f:
         f.write(uploaded_file.getbuffer())
     st.success(f"File saved: {uploaded_file.name}")
-    st.experimental_rerun()
+    st.rerun()
 
 # --- Load Most Recent File Automatically ---
 available_files = sorted(
