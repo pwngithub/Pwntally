@@ -35,20 +35,10 @@ if not available_files:
     st.stop()
 
 else:
-    start_date, end_date = date_range
-    filtered_data = data[
-        (data["Submission Date"].dt.date >= start_date) &
-        (data["Submission Date"].dt.date <= end_date)
-    ]
-filtered_data = data[
-    (data["Submission Date"].dt.date >= start_date) &
-    (data["Submission Date"].dt.date <= end_date)
-]
+    filtered_data = data.copy()
 
-filtered_data = data[
-    (data["Submission Date"].dt.date >= start_date) &
-    (data["Submission Date"].dt.date <= end_date)
-]
+
+
 
 status_options = ["All"] + sorted(filtered_data["Status"].dropna().unique())
 selected_status = st.sidebar.selectbox("Status", status_options)
