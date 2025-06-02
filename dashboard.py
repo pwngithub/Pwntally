@@ -72,8 +72,8 @@ if len(date_range) != 2:
 start_date, end_date = date_range
 
 filtered_data = data[
-    (data["Submission Date"] >= pd.Timestamp(start_date)) &
-    (data["Submission Date"] <= pd.Timestamp(end_date))
+    (data["Submission Date"].dt.date >= start_date) &
+    (data["Submission Date"].dt.date <= end_date)
 ]
 
 status_options = ["All"] + sorted(filtered_data["Status"].dropna().unique())
