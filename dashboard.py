@@ -65,13 +65,18 @@ min_date, max_date = data["Submission Date"].min(), data["Submission Date"].max(
 if st.session_state.get("date_range") is None:
     st.session_state.date_range = [min_date, max_date]
 
-date_range = st.sidebar.date_input("Submission Date Range")
+date_range = st.sidebar.date_input("Submission Date Range", value=[min_date, max_date])
 if len(date_range) != 2:
     st.error("Please select a start and end date.")
     st.stop()
-if isinstance(date_range, list) and len(date_range) == 2:
-    start_date, end_date = date_range
-    filtered_data = data[
+if len(date_range) != 2:
+    st.error("Please select both a start and end date.")
+    st.stop()
+start_date, end_date = date_range
+filtered_data = data[
+    (data["Submission Date"].dt.date >= start_date) &
+    (data["Submission Date"].dt.date <= end_date)
+][
         (data["Submission Date"].dt.date >= start_date) &
         (data["Submission Date"].dt.date <= end_date)
     ]
