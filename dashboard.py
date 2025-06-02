@@ -34,30 +34,8 @@ if not available_files:
     st.warning("No uploaded files available.")
     st.stop()
 
-st.header("📌 Overall Totals")
-total_summary = filtered_data.groupby("Status").agg(Count=("Status", "count")).reset_index()
-adjusted_mrc = filtered_data.copy()
-adjusted_mrc["MRC"] = adjusted_mrc.apply(
-    lambda row: -row["MRC"] if row["Status"] == "Disconnect" else row["MRC"],
-    axis=1
-)
-total_mrc = adjusted_mrc["MRC"].sum()
-st.dataframe(total_summary)
-st.metric("Net MRC", f"${total_mrc:,.2f}")
 
-st.header("📈 Growth Summary (NEW, Convert, Previous)")
-growth_df = filtered_data[filtered_data["Status"].isin(["NEW", "Convert", "Previous"])].copy()
-growth_totals = growth_df.groupby("Status").agg(TotalMRC=("MRC", "sum")).reset_index()
 
-new_mrc = growth_df[growth_df["Status"] == "NEW"]["MRC"].sum()
-convert_mrc = growth_df[growth_df["Status"] == "Convert"]["MRC"].sum()
-previous_mrc = growth_df[growth_df["Status"] == "Previous"]["MRC"].sum()
-
-churn_df = filtered_data[filtered_data["Status"] == "Disconnect"]
-churn_mrc = churn_df["MRC"].sum()
-net_growth_mrc = new_mrc + convert_mrc + previous_mrc - churn_mrc
-
-st.dataframe(growth_totals)
 st.metric("Net Growth MRC (Gains - Churn)", f"${net_growth_mrc:,.2f}")
 
 st.header("⚠️ Churn Summary by Reason")
