@@ -2,25 +2,47 @@
 import pandas as pd
 import streamlit as st
 import matplotlib.pyplot as plt
+import os
+from datetime import datetime
 
 st.title("📊 Customer Service Activity Dashboard")
 
-# File uploader
+# --- File Upload and Storage ---
+UPLOAD_DIR = "uploaded_files"
+os.makedirs(UPLOAD_DIR, exist_ok=True)
+
 st.sidebar.header("📤 Upload Excel File")
 uploaded_file = st.sidebar.file_uploader("Choose an Excel file", type=["xlsx"])
 
 if uploaded_file:
-    xls = pd.ExcelFile(uploaded_file)
-else:
-    xls = pd.ExcelFile("1-6-2025.xlsx")
+    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+    save_path = os.path.join(UPLOAD_DIR, f"{timestamp}_{uploaded_file.name}")
+    with open(save_path, "wb") as f:
+        f.write(uploaded_file.getbuffer())
+    st.success(f"File saved: {uploaded_file.name}")
+    st.experimental_rerun()
 
+# --- Load Most Recent File Automatically ---
+available_files = sorted(
+    [f for f in os.listdir(UPLOAD_DIR) if f.endswith(".xlsx")],
+    reverse=True
+)
+
+if not available_files:
+    st.warning("No uploaded files yet. Please upload an .xlsx file to continue.")
+    st.stop()
+
+latest_file = available_files[0]
+latest_file_path = os.path.join(UPLOAD_DIR, latest_file)
+st.subheader(f"📂 Analyzing File: `{latest_file}`")
+
+xls = pd.ExcelFile(latest_file_path)
 df = xls.parse('Sheet1')
 
-# Clean and convert
+# --- Clean and process ---
 df["MRC"] = pd.to_numeric(df["MRC"], errors="coerce")
 df["Submission Date"] = pd.to_datetime(df["Submission Date"], errors="coerce")
 
-# Filtered data
 new_df = df[df["Status"] == "NEW"]
 disconnect_df = df[df["Status"] == "Disconnect"]
 convert_df = df[df["Status"] == "CONVERT"]
