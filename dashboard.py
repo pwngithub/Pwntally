@@ -62,7 +62,14 @@ selected_status = st.sidebar.selectbox("Status", status_options)
 if selected_status != "All":
     df = df[df["Status"] == selected_status]
 
+
+reason_options = ["All"] + sorted(df["Reason"].dropna().unique().tolist())
+selected_reason = st.sidebar.selectbox("Reason", reason_options)
+if selected_reason != "All":
+    df = df[df["Reason"] == selected_reason]
+
 # --- Metrics ---
+
 
 
 st.header("📌 Key Metrics")
