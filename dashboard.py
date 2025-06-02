@@ -33,14 +33,7 @@ available_files = sorted(all_files, reverse=(sort_order == "Newest First"))
 if not available_files:
     st.warning("No uploaded files available.")
     st.stop()
-date_range = st.sidebar.date_input("Submission Date Range")
 
-if "Submission Date" not in data.columns:
-    st.warning("No Submission Date column found.")
-    st.stop()
-
-if len(date_range) != 2:
-    filtered_data = data.copy()
 else:
     start_date, end_date = date_range
     filtered_data = data[
