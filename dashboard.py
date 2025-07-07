@@ -211,11 +211,19 @@ st.download_button(
 
 st.info("💡 To save the full dashboard as PDF (including charts), use your browser’s **Print → Save as PDF** option.")
 
-# --- Delete Saved File ---
-st.sidebar.header("🗑️ Delete Saved File")
-delete_file = st.sidebar.selectbox("Select a file to delete", saved_files)
-if st.sidebar.button("Delete Selected File"):
-    if delete_file:
-        os.remove(os.path.join(UPLOAD_DIR, delete_file))
-        st.success(f"Deleted file: {delete_file}")
-        st.experimental_rerun()
+# --- Load from Saved Files ---
+
+st.sidebar.header("📂 Load Saved File")
+saved_files = sorted([f for f in os.listdir(UPLOAD_DIR) if f.endswith(".xlsx")])
+selected_saved_file = st.sidebar.selectbox("Select a saved file", saved_files)
+
+if selected_saved_file and st.sidebar.button("Load Selected File"):
+    st.session_state.current_file = os.path.join(UPLOAD_DIR, selected_saved_file)
+    st.experimental_rerun()
+
+if st.session_state.current_file:
+    latest_path = st.session_state.current_file
+    st.subheader(f"📂 Analyzing File: `{os.path.basename(latest_path)}`")
+else:
+    st.warning("No file selected. Please upload or select a saved file to begin.")
+    st.stop()
