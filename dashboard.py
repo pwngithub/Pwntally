@@ -210,3 +210,12 @@ st.download_button(
 )
 
 st.info("💡 To save the full dashboard as PDF (including charts), use your browser’s **Print → Save as PDF** option.")
+
+# --- Delete Saved File ---
+st.sidebar.header("🗑️ Delete Saved File")
+delete_file = st.sidebar.selectbox("Select a file to delete", saved_files)
+if st.sidebar.button("Delete Selected File"):
+    if delete_file:
+        os.remove(os.path.join(UPLOAD_DIR, delete_file))
+        st.success(f"Deleted file: {delete_file}")
+        st.experimental_rerun()
