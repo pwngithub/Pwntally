@@ -104,9 +104,10 @@ if "Total_MRC" in churn_summary.columns and pd.api.types.is_numeric_dtype(churn_
 st.header("📊 Visualizations")
 
 if not churn_summary.empty:
+    churn_summary_sorted = churn_summary.sort_values(by="Count", ascending=True)
     fig1, ax1 = plt.subplots()
-    ax1.barh(churn_summary["Reason"], churn_summary["Count"])
-    ax1.set_title("Churn Count by Reason")
+    ax1.barh(churn_summary_sorted["Reason"], churn_summary_sorted["Count"])
+    ax1.set_title("Churn Count by Reason (Sorted)")
     st.pyplot(fig1)
 
 if "Location" in disconnects.columns:
