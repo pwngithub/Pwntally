@@ -196,28 +196,6 @@ st.markdown("---")
 
 # --- Churn by Reason ---
 st.markdown("---")
-st.header("📉 Churn by Reason")
-churn_summary = disconnects.groupby("Reason").agg(
-    Count=("Reason", "count"),
-    Total_MRC=("MRC", lambda x: pd.to_numeric(x, errors="coerce").fillna(0).sum())
-).reset_index()
-churn_summary = churn_summary.sort_values(by="Count", ascending=False)
-
-st.dataframe(churn_summary, use_container_width=True)
-
-fig_reason = px.bar(
-    churn_summary,
-    x="Count",
-    y="Reason",
-    orientation="h",
-    title="Churn by Reason (Sorted)",
-    color="Count",
-    height=500,
-    color_continuous_scale=["#7CB342", "#405C88"]
-)
-st.plotly_chart(fig_reason, use_container_width=True, key="fig_reason")
-
-# --- Churn by Location ---
 st.markdown("---")
 st.header("📍 Churn by Location (Top 20)")
 loc_summary = disconnects.groupby("Location").size().reset_index(name="Count")
