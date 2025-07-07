@@ -27,7 +27,7 @@ if "current_file" not in st.session_state:
 
 uploaded_file = st.sidebar.file_uploader("Upload Excel File", type=["xlsx"], key="file_uploader")
 
-if uploaded_file and not st.session_state.current_file:
+if uploaded_file and ("current_file" not in st.session_state or not st.session_state.current_file):
     tmp_path = os.path.join(UPLOAD_DIR, f"tmp_{uploaded_file.name}")
     with open(tmp_path, "wb") as f:
         f.write(uploaded_file.getbuffer())
