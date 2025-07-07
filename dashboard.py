@@ -30,6 +30,13 @@ if uploaded_file and "just_uploaded" not in st.session_state:
 if "current_file" not in st.session_state:
     st.session_state.current_file = None
 
+if uploaded_file and not st.session_state.current_file:
+    # Save uploaded file temporarily and set as current
+    tmp_path = os.path.join(UPLOAD_DIR, f"tmp_{uploaded_file.name}")
+    with open(tmp_path, "wb") as f:
+        f.write(uploaded_file.getbuffer())
+    st.session_state.current_file = tmp_path
+
 if st.sidebar.button("🚫 Clear Current File"):
     st.session_state.current_file = None
     st.experimental_rerun()
@@ -44,16 +51,11 @@ if uploaded_file:
             saved_path = os.path.join(UPLOAD_DIR, f"{custom_name.strip()}.xlsx")
             with open(saved_path, "wb") as f:
                 f.write(uploaded_file.getbuffer())
+            st.session_state.current_file = saved_path
             st.success(f"File saved as: {custom_name.strip()}.xlsx")
+            st.experimental_rerun()
         else:
             st.error("Please enter a valid name before saving.")
-
-    # Automatically set uploaded file as active
-    tmp_path = os.path.join(UPLOAD_DIR, f"tmp_{uploaded_file.name}")
-    with open(tmp_path, "wb") as f:
-        f.write(uploaded_file.getbuffer())
-    st.session_state.current_file = tmp_path
-    st.experimental_rerun()
 
 # --- Load from Saved Files ---
 st.sidebar.header("📂 Load Saved File")
@@ -210,20 +212,3 @@ st.download_button(
 )
 
 st.info("💡 To save the full dashboard as PDF (including charts), use your browser’s **Print → Save as PDF** option.")
-
-# --- Load from Saved Files ---
-
-st.sidebar.header("📂 Load Saved File")
-saved_files = sorted([f for f in os.listdir(UPLOAD_DIR) if f.endswith(".xlsx")])
-selected_saved_file = st.sidebar.selectbox("Select a saved file", saved_files)
-
-if selected_saved_file and st.sidebar.button("Load Selected File"):
-    st.session_state.current_file = os.path.join(UPLOAD_DIR, selected_saved_file)
-    st.experimental_rerun()
-
-if st.session_state.current_file:
-    latest_path = st.session_state.current_file
-    st.subheader(f"📂 Analyzing File: `{os.path.basename(latest_path)}`")
-else:
-    st.warning("No file selected. Please upload or select a saved file to begin.")
-    st.stop()
