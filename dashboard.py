@@ -20,7 +20,10 @@ os.makedirs(UPLOAD_DIR, exist_ok=True)
 
 # --- Manage Active File ---
 if "current_file" not in st.session_state:
-    if "current_file" in st.session_state: del st.session_state["current_file"]
+    if "current_file" in st.session_state:
+        tmp_path = st.session_state["current_file"]
+        if tmp_path.startswith("uploaded_data/tmp_") and os.path.exists(tmp_path): os.remove(tmp_path)
+        del st.session_state["current_file"]
 
 uploaded_file = st.sidebar.file_uploader("Upload Excel File", type=["xlsx"], key="file_uploader")
 
@@ -31,9 +34,12 @@ if uploaded_file and not st.session_state.current_file:
     st.session_state.current_file = tmp_path
 
 if st.sidebar.button("🚫 Clear Current File", key="clear_file_button"):
-    if "current_file" in st.session_state: del st.session_state["current_file"]
+    if "current_file" in st.session_state:
+        tmp_path = st.session_state["current_file"]
+        if tmp_path.startswith("uploaded_data/tmp_") and os.path.exists(tmp_path): os.remove(tmp_path)
+        del st.session_state["current_file"]
 
-if not st.session_state.current_file:
+if "current_file" not in st.session_state or not st.session_state.current_file:
     st.info("Please upload a file to begin analysis.")
     st.stop()
 
@@ -41,11 +47,24 @@ latest_path = st.session_state.current_file
 st.subheader(f"📂 Analyzing: `{os.path.basename(latest_path)}`")
 
 # --- Load data ---
+
 xls = pd.ExcelFile(latest_path)
+if "Sheet1" not in xls.sheet_names:
+    st.error("The uploaded file does not contain a sheet named 'Sheet1'. Please upload a valid file.")
+    st.stop()
 df = xls.parse("Sheet1")
+
+expected_cols = ["Submission Date", "Status", "Reason", "Category", "Location"]
+missing_cols = [col for col in expected_cols if col not in df.columns]
+if missing_cols:
+    st.error(f"The uploaded file is missing required columns: {', '.join(missing_cols)}.")
+    st.stop()
+
 
 df["Submission Date"] = pd.to_datetime(df["Submission Date"], errors="coerce")
 df = df.dropna(subset=["Submission Date"])
+if len(df) > 100000:
+    st.warning("The uploaded file has more than 100,000 rows — this may affect performance.")
 df["Month"] = df["Submission Date"].dt.to_period("M").astype(str)
 
 # --- KPIs ---
@@ -128,6 +147,12 @@ st.caption("<span style='color:#405C88;'>Professional Dashboard generated with �
 
 
 # --- Filters ---
+if st.sidebar.button("🔄 Reset Filters", key="reset_filters"):
+    st.session_state["month_filter"] = "All"
+    st.session_state["category_filter"] = "All"
+    st.session_state["status_filter"] = "All"
+    st.session_state["reason_filter"] = "All"
+    st.experimental_rerun()
 st.sidebar.header("🔎 Filters")
 
 month_options = ["All"] + sorted(df["Month"].unique())
