@@ -5,17 +5,6 @@ import streamlit as st
 import matplotlib.pyplot as plt
 from datetime import datetime
 
-import re
-
-def clean_total_mrc(value):
-    if pd.isna(value):
-        return 0
-    if isinstance(value, (int, float)):
-        return value
-    parts = re.findall(r"\d+\.\d{2}", str(value))
-    return sum(float(p) for p in parts)
-
-
 st.title("📊 Monthly Customer Activity Dashboard")
 
 # --- Ensure upload directory exists ---
@@ -97,7 +86,9 @@ st.dataframe(summary)
 
 # --- Churn Overview ---
 st.header("📉 Churn by Reason")
-disconnects = df[df["Status"] == "Disconnect"]
+disconnects = df[df["Status"] == "Disconnect"].copy()
+disconnects["MRC"] = pd.to_numeric(disconnects["MRC"], errors="coerce").fillna(0)
+
 churn_summary = disconnects.groupby("Reason").agg(
     Count=("Reason", "count"),
     Total_MRC=("MRC", "sum")
@@ -106,15 +97,8 @@ st.dataframe(churn_summary)
 
 # --- Total MRC Sum Display ---
 if "Total_MRC" in churn_summary.columns and pd.api.types.is_numeric_dtype(churn_summary["Total_MRC"]):
-    total_mrc_sum = pd.to_numeric(churn_summary["Total_MRC"], errors='coerce').sum()
+    total_mrc_sum = churn_summary["Total_MRC"].sum()
     st.markdown(f"**Total Churn MRC:** ${total_mrc_sum:,.2f}")
-
-
-# --- Total MRC ---
-if "Total_MRC" in churn_summary.columns and pd.api.types.is_numeric_dtype(churn_summary["Total_MRC"]):
-    total_mrc_sum = pd.to_numeric(churn_summary["Total_MRC"], errors='coerce').sum()
-    st.metric("Total MRC from Churn Reasons", f"${total_mrc_sum:,.2f}")
-
 
 # --- Charts ---
 st.header("📊 Visualizations")
