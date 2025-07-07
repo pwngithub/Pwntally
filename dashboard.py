@@ -7,7 +7,7 @@ import plotly.express as px
 
 st.set_page_config(page_title="Customer Activity Report", layout="wide")
 
-st.title("📊 Monthly Customer Performance Report")
+st.markdown("<h1 style='color:#405C88;'>📊 Monthly Customer Performance Report</h1>", unsafe_allow_html=True)
 st.markdown("""
 This dashboard presents key metrics and insights into customer churn and growth. 
 It analyzes one uploaded file at a time, focusing on churn reasons, MRC impact, and new customer trends.
@@ -76,7 +76,7 @@ fig_reason = px.bar(
     y="Reason",
     orientation="h",
     title="Churn by Reason (Sorted)",
-    color="Count",
+    color="Count", color_continuous_scale=["#7CB342", "#405C88"],
     height=500
 )
 st.plotly_chart(fig_reason, use_container_width=True)
@@ -91,7 +91,7 @@ fig_location = px.bar(
     x="Location",
     y="Count",
     title="Churn by Location (Top 20)",
-    color="Count"
+    color="Count", color_continuous_scale=["#7CB342", "#405C88"]
 )
 st.plotly_chart(fig_location, use_container_width=True)
 
@@ -108,7 +108,7 @@ with col4:
         x="Category",
         y="Count",
         title="New Customers by Category",
-        color="Count"
+        color="Count", color_continuous_scale=["#7CB342", "#405C88"]
     )
     st.plotly_chart(fig_new_cat, use_container_width=True)
 
@@ -118,9 +118,9 @@ with col5:
         x="Location",
         y="Count",
         title="New Customers by Location (Top 20)",
-        color="Count"
+        color="Count", color_continuous_scale=["#7CB342", "#405C88"]
     )
     st.plotly_chart(fig_new_loc, use_container_width=True)
 
 st.markdown("---")
-st.caption("Professional Dashboard generated with ❤️ for Board Review")
+st.caption("<span style='color:#405C88;'>Professional Dashboard generated with ❤️ for Board Review</span>", unsafe_allow_html=True)
