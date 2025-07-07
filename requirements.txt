@@ -2,5 +2,3 @@ streamlit
 pandas
 matplotlib
 openpyxl
-jinja2
-pdfkit
