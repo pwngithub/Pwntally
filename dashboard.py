@@ -39,7 +39,6 @@ if uploaded_file and not st.session_state.current_file:
 
 if st.sidebar.button("🚫 Clear Current File"):
     st.session_state.current_file = None
-    st.experimental_rerun()
 
 # --- Save Uploaded File with Custom Name ---
 st.sidebar.header("💾 Save Uploaded File")
