@@ -127,3 +127,28 @@ if not pie_data.empty:
     ax3.set_ylabel("")
     ax3.set_title("Status Breakdown")
     st.pyplot(fig3)
+
+# --- New Customers Visualizations ---
+st.header("📈 New Customers Visualizations")
+
+new_customers = df[df["Status"] == "NEW"].copy()
+
+if not new_customers.empty:
+    cat_summary = new_customers.groupby("Category").size().sort_values(ascending=False)
+    if not cat_summary.empty:
+        fig4, ax4 = plt.subplots()
+        cat_summary.plot(kind="bar", ax=ax4)
+        ax4.set_title("New Customers by Category")
+        ax4.set_xlabel("Category")
+        ax4.set_ylabel("Count")
+        st.pyplot(fig4)
+
+    loc_summary = new_customers.groupby("Location").size().sort_values(ascending=False).head(20)
+    if not loc_summary.empty:
+        fig5, ax5 = plt.subplots()
+        loc_summary.plot(kind="bar", ax=ax5)
+        ax5.set_title("New Customers by Location (Top 20)")
+        ax5.set_xlabel("Location")
+        ax5.set_ylabel("Count")
+        ax5.tick_params(axis='x', rotation=90)
+        st.pyplot(fig5)
