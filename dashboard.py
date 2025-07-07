@@ -125,3 +125,30 @@ with col5:
 
 st.markdown("---")
 st.caption("<span style='color:#405C88;'>Professional Dashboard generated with ❤️ for Board Review</span>", unsafe_allow_html=True)
+
+
+# --- Filters ---
+st.sidebar.header("🔎 Filters")
+
+month_options = ["All"] + sorted(df["Month"].unique())
+selected_month = st.sidebar.selectbox("Submission Month", month_options)
+if selected_month != "All":
+    df = df[df["Month"] == selected_month]
+
+if "Category" in df.columns:
+    cat_options = ["All"] + sorted(df["Category"].dropna().unique())
+    selected_cat = st.sidebar.selectbox("Category", cat_options)
+    if selected_cat != "All":
+        df = df[df["Category"] == selected_cat]
+
+if "Status" in df.columns:
+    status_options = ["All"] + sorted(df["Status"].dropna().unique())
+    selected_status = st.sidebar.selectbox("Status", status_options)
+    if selected_status != "All":
+        df = df[df["Status"] == selected_status]
+
+if "Reason" in df.columns:
+    reason_options = ["All"] + sorted(df["Reason"].dropna().unique())
+    selected_reason = st.sidebar.selectbox("Reason", reason_options)
+    if selected_reason != "All":
+        df = df[df["Reason"] == selected_reason]
