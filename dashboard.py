@@ -81,7 +81,8 @@ col3.metric("💲 Churn MRC Impact", f"${churn_mrc:,.2f}")
 st.markdown("---")
 
 # --- Churn by Reason ---
-st.header("Churn Analysis by Reason")
+st.markdown("---")
+st.header("📉 Churn by Reason")
 churn_summary = disconnects.groupby("Reason").agg(
     Count=("Reason", "count"),
     Total_MRC=("MRC", lambda x: pd.to_numeric(x, errors="coerce").fillna(0).sum())
@@ -102,7 +103,8 @@ fig_reason = px.bar(
 st.plotly_chart(fig_reason, use_container_width=True, key="fig_reason")
 
 # --- Churn by Location ---
-st.header("Churn by Location (Top 20)")
+st.markdown("---")
+st.header("📍 Churn by Location (Top 20)")
 loc_summary = disconnects.groupby("Location").size().reset_index(name="Count")
 loc_summary = loc_summary.sort_values(by="Count", ascending=False).head(20)
 
@@ -116,7 +118,8 @@ fig_location = px.bar(
 st.plotly_chart(fig_location, use_container_width=True, key="fig_location")
 
 # --- New Customers ---
-st.header("New Customer Trends")
+st.markdown("---")
+st.header("📊 New Customers by Category & Location")
 new_by_category = new_customers.groupby("Category").size().reset_index(name="Count").sort_values(by="Count", ascending=False)
 new_by_location = new_customers.groupby("Location").size().reset_index(name="Count").sort_values(by="Count", ascending=False).head(20)
 
@@ -192,7 +195,8 @@ col3.metric("💲 Churn MRC Impact", f"${churn_mrc:,.2f}")
 st.markdown("---")
 
 # --- Churn by Reason ---
-st.header("Churn Analysis by Reason")
+st.markdown("---")
+st.header("📉 Churn by Reason")
 churn_summary = disconnects.groupby("Reason").agg(
     Count=("Reason", "count"),
     Total_MRC=("MRC", lambda x: pd.to_numeric(x, errors="coerce").fillna(0).sum())
@@ -214,7 +218,8 @@ fig_reason = px.bar(
 st.plotly_chart(fig_reason, use_container_width=True, key="fig_reason")
 
 # --- Churn by Location ---
-st.header("Churn by Location (Top 20)")
+st.markdown("---")
+st.header("📍 Churn by Location (Top 20)")
 loc_summary = disconnects.groupby("Location").size().reset_index(name="Count")
 loc_summary = loc_summary.sort_values(by="Count", ascending=False).head(20)
 
@@ -229,7 +234,155 @@ fig_location = px.bar(
 st.plotly_chart(fig_location, use_container_width=True, key="fig_location")
 
 # --- New Customers ---
-st.header("New Customer Trends")
+st.markdown("---")
+st.header("📊 New Customers by Category & Location")
+new_by_category = new_customers.groupby("Category").size().reset_index(name="Count").sort_values(by="Count", ascending=False)
+new_by_location = new_customers.groupby("Location").size().reset_index(name="Count").sort_values(by="Count", ascending=False).head(20)
+
+col4, col5 = st.columns(2)
+
+with col4:
+    fig_new_cat = px.bar(
+        new_by_category,
+        x="Category",
+        y="Count",
+        title="New Customers by Category",
+        color="Count",
+        color_continuous_scale=["#7CB342", "#405C88"]
+    )
+    st.plotly_chart(fig_new_cat, use_container_width=True, key="fig_new_cat")
+
+with col5:
+    fig_new_loc = px.bar(
+        new_by_location,
+        x="Location",
+        y="Count",
+        title="New Customers by Location (Top 20)",
+        color="Count",
+        color_continuous_scale=["#7CB342", "#405C88"]
+    )
+    st.plotly_chart(fig_new_loc, use_container_width=True, key="fig_new_loc")
+
+st.markdown("---")
+st.caption("<span style='color:#405C88;'>Professional Dashboard generated with ❤️ for Board Review</span>", unsafe_allow_html=True)# --- New Customers ---
+st.markdown("---")
+st.header("📊 New Customers by Category & Location")
+new_by_category = new_customers.groupby("Category").size().reset_index(name="Count").sort_values(by="Count", ascending=False)
+new_by_location = new_customers.groupby("Location").size().reset_index(name="Count").sort_values(by="Count", ascending=False).head(20)
+
+col4, col5 = st.columns(2)
+
+with col4:
+    fig_new_cat = px.bar(
+        new_by_category,
+        x="Category",
+        y="Count",
+        title="New Customers by Category",
+        color="Count", color_continuous_scale=["#7CB342", "#405C88"]
+    )
+    st.plotly_chart(fig_new_cat, use_container_width=True, key="fig_new_cat")
+
+with col5:
+    fig_new_loc = px.bar(
+        new_by_location,
+        x="Location",
+        y="Count",
+        title="New Customers by Location (Top 20)",
+        color="Count", color_continuous_scale=["#7CB342", "#405C88"]
+    )
+    st.plotly_chart(fig_new_loc, use_container_width=True, key="fig_new_loc")
+
+st.markdown("---")
+st.caption("<span style='color:#405C88;'>Professional Dashboard generated with ❤️ for Board Review</span>", unsafe_allow_html=True)
+
+
+# --- Filters ---
+if st.sidebar.button("🔄 Reset Filters", key="reset_filters"):
+    st.session_state["month_filter"] = "All"
+    st.session_state["category_filter"] = "All"
+    st.session_state["status_filter"] = "All"
+    st.session_state["reason_filter"] = "All"
+    st.experimental_rerun()
+st.sidebar.header("🔎 Filters")
+
+month_options = ["All"] + sorted(df["Month"].unique())
+selected_month = st.sidebar.selectbox("Submission Month", month_options, key="month_filter")
+if selected_month != "All":
+    df = df[df["Month"] == selected_month]
+
+if "Category" in df.columns:
+    cat_options = ["All"] + sorted(df["Category"].dropna().unique())
+    selected_cat = st.sidebar.selectbox("Category", cat_options, key="category_filter")
+    if selected_cat != "All":
+        df = df[df["Category"] == selected_cat]
+
+if "Status" in df.columns:
+    status_options = ["All"] + sorted(df["Status"].dropna().unique())
+    selected_status = st.sidebar.selectbox("Status", status_options, key="status_filter")
+    if selected_status != "All":
+        df = df[df["Status"] == selected_status]
+
+if "Reason" in df.columns:
+    reason_options = ["All"] + sorted(df["Reason"].dropna().unique())
+    selected_reason = st.sidebar.selectbox("Reason", reason_options, key="reason_filter")
+    if selected_reason != "All":
+        df = df[df["Reason"] == selected_reason]
+
+# --- KPIs ---
+total_customers = len(df)
+disconnects = df[df["Status"] == "Disconnect"]
+new_customers = df[df["Status"] == "NEW"]
+churn_mrc = pd.to_numeric(disconnects["MRC"], errors="coerce").fillna(0).sum()
+
+col1, col2, col3 = st.columns(3)
+col1.metric("📈 Total Records", f"{total_customers}")
+col2.metric("📉 Churned Customers", f"{len(disconnects)}")
+col3.metric("💲 Churn MRC Impact", f"${churn_mrc:,.2f}")
+
+st.markdown("---")
+
+# --- Churn by Reason ---
+st.markdown("---")
+st.header("📉 Churn by Reason")
+churn_summary = disconnects.groupby("Reason").agg(
+    Count=("Reason", "count"),
+    Total_MRC=("MRC", lambda x: pd.to_numeric(x, errors="coerce").fillna(0).sum())
+).reset_index()
+churn_summary = churn_summary.sort_values(by="Count", ascending=False)
+
+st.dataframe(churn_summary, use_container_width=True)
+
+fig_reason = px.bar(
+    churn_summary,
+    x="Count",
+    y="Reason",
+    orientation="h",
+    title="Churn by Reason (Sorted)",
+    color="Count",
+    height=500,
+    color_continuous_scale=["#7CB342", "#405C88"]
+)
+st.plotly_chart(fig_reason, use_container_width=True, key="fig_reason")
+
+# --- Churn by Location ---
+st.markdown("---")
+st.header("📍 Churn by Location (Top 20)")
+loc_summary = disconnects.groupby("Location").size().reset_index(name="Count")
+loc_summary = loc_summary.sort_values(by="Count", ascending=False).head(20)
+
+fig_location = px.bar(
+    loc_summary,
+    x="Location",
+    y="Count",
+    title="Churn by Location (Top 20)",
+    color="Count",
+    color_continuous_scale=["#7CB342", "#405C88"]
+)
+st.plotly_chart(fig_location, use_container_width=True, key="fig_location")
+
+# --- New Customers ---
+st.markdown("---")
+st.header("📊 New Customers by Category & Location")
 new_by_category = new_customers.groupby("Category").size().reset_index(name="Count").sort_values(by="Count", ascending=False)
 new_by_location = new_customers.groupby("Location").size().reset_index(name="Count").sort_values(by="Count", ascending=False).head(20)
 
