@@ -55,7 +55,7 @@ if "Sheet1" not in xls.sheet_names:
 df = xls.parse("Sheet1")
 df.columns = df.columns.str.strip().str.lower().str.title()
 
-expected_cols = ["Submission Date", "Status", "Reason", "Category", "Location"]
+expected_cols = ["Submission Date", "Status", "Reason", "Category", "Location", "Mrc"]
 missing_cols = [col for col in expected_cols if col not in df.columns]
 if missing_cols:
     st.error(f"The uploaded file is missing required columns: {', '.join(missing_cols)}.")
