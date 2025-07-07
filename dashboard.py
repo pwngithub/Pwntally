@@ -112,10 +112,11 @@ if not churn_summary.empty:
 
 if "Location" in disconnects.columns:
     loc_summary = disconnects.groupby("Location").agg(Count=("Location", "count")).reset_index()
-    if not loc_summary.empty:
+    loc_summary_sorted = loc_summary.sort_values(by="Count", ascending=False).head(20)
+    if not loc_summary_sorted.empty:
         fig2, ax2 = plt.subplots()
-        ax2.bar(loc_summary["Location"], loc_summary["Count"])
-        ax2.set_title("Churn by Location")
+        ax2.bar(loc_summary_sorted["Location"], loc_summary_sorted["Count"])
+        ax2.set_title("Churn by Location (Top 20)")
         ax2.tick_params(axis='x', rotation=90)
         st.pyplot(fig2)
 
