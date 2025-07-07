@@ -53,6 +53,7 @@ if "Sheet1" not in xls.sheet_names:
     st.error("The uploaded file does not contain a sheet named 'Sheet1'. Please upload a valid file.")
     st.stop()
 df = xls.parse("Sheet1")
+df.columns = df.columns.str.strip().str.lower().str.title()
 
 expected_cols = ["Submission Date", "Status", "Reason", "Category", "Location"]
 missing_cols = [col for col in expected_cols if col not in df.columns]
