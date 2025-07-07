@@ -25,6 +25,32 @@ if uploaded_file and "just_uploaded" not in st.session_state:
     st.rerun()
 
 # --- Use the most recent uploaded file ---
+
+# --- Save Uploaded File with Custom Name ---
+st.sidebar.header("💾 Save Uploaded File")
+
+if uploaded_file:
+    custom_name = st.sidebar.text_input("Enter a name to save this file as")
+    if st.sidebar.button("Save File"):
+        if custom_name.strip():
+            saved_path = os.path.join(UPLOAD_DIR, f"{custom_name.strip()}.xlsx")
+            with open(saved_path, "wb") as f:
+                f.write(uploaded_file.getbuffer())
+            st.success(f"File saved as: {custom_name.strip()}.xlsx")
+        else:
+            st.error("Please enter a valid name before saving.")
+
+# --- Load from Saved Files ---
+st.sidebar.header("📂 Load Saved File")
+saved_files = sorted([f for f in os.listdir(UPLOAD_DIR) if f.endswith(".xlsx")])
+selected_saved_file = st.sidebar.selectbox("Select a saved file", saved_files)
+
+if selected_saved_file:
+    latest_path = os.path.join(UPLOAD_DIR, selected_saved_file)
+    st.subheader(f"📂 Analyzing Saved File: `{selected_saved_file}`")
+else:
+    st.warning("No saved files found. Please upload and save a file first.")
+
 uploaded_files = sorted(
     [f for f in os.listdir(UPLOAD_DIR) if f.endswith(".xlsx")],
     reverse=True
